@@ -241,44 +241,44 @@ const Qs=[
   {id:'speech',type:'single',text:"How is your child's speech and communication?",area:'Speech & Language',svc:'Speech Therapy',opts:[
     {l:'Good, about what I would expect for their age',v:'ok',w:0},
     {l:'A little behind, not as many words or as clear as I would like',v:'m1',w:1},
-    {l:'Quite behind, hard to understand or very few words',v:'m2',w:2},
-    {l:'Very behind or not really speaking yet',v:'m3',w:3}
+    {l:'Quite behind, hard to understand or very few words',v:'m2',w:5},
+    {l:'Very behind or not really speaking yet',v:'m3',w:10}
   ]},
   {id:'behaviour',type:'single',text:"Does your child have big meltdowns or find it really hard when things change or do not go their way?",area:'Behaviour & Regulation',svc:'ABA / Behavioural Therapy',opts:[
     {l:'Not really, pretty normal for their age',v:'ok',w:0},
     {l:'Sometimes, a bit more than other kids their age',v:'m1',w:1},
-    {l:'Often, it causes problems at home or when we are out',v:'m2',w:2},
-    {l:'Almost every day, it is really hard to manage',v:'m3',w:3}
+    {l:'Often, it causes problems at home or when we are out',v:'m2',w:5},
+    {l:'Almost every day, it is really hard to manage',v:'m3',w:10}
   ]},
   {id:'social',type:'single',text:"How does your child get along with other kids and adults?",area:'Social & Play Skills',svc:'Speech Therapy',opts:[
     {l:'Really well, they make friends and join in easily',v:'ok',w:0},
     {l:'They prefer to play alone but will join in when encouraged',v:'m1',w:1},
-    {l:'They tend to avoid others or do not seem interested in playing',v:'m2',w:2},
-    {l:'Very little interaction, rarely makes eye contact or joins in',v:'m3',w:3}
+    {l:'They tend to avoid others or do not seem interested in playing',v:'m2',w:5},
+    {l:'Very little interaction, rarely makes eye contact or joins in',v:'m3',w:10}
   ]},
   {id:'motor',type:'single',text:"Does your child struggle with things like holding a pencil, cutting, or being physically coordinated?",area:'Motor & Coordination',svc:'Occupational Therapy',opts:[
     {l:'No, they seem fine for their age',v:'ok',w:0},
     {l:'A little, but they get there',v:'m1',w:1},
-    {l:'Yes, noticeably more than other kids their age',v:'m2',w:2},
-    {l:'Yes, it is a real struggle and they often avoid these things',v:'m3',w:3}
+    {l:'Yes, noticeably more than other kids their age',v:'m2',w:5},
+    {l:'Yes, it is a real struggle and they often avoid these things',v:'m3',w:10}
   ]},
   {id:'attention',type:'single',text:"How is your child's ability to focus and follow simple instructions?",area:'Attention & Focus',svc:'Occupational Therapy',opts:[
     {l:'Good, about normal for their age',v:'ok',w:0},
     {l:'A bit scattered, needs a lot of reminders',v:'m1',w:1},
-    {l:'Often struggles to focus or finish things',v:'m2',w:2},
-    {l:'Really hard to get through to them, affects daily life a lot',v:'m3',w:3}
+    {l:'Often struggles to focus or finish things',v:'m2',w:5},
+    {l:'Really hard to get through to them, affects daily life a lot',v:'m3',w:10}
   ]},
   {id:'learning',type:'single',text:"Is your child keeping up with letters, reading, or writing compared to kids their age?",area:'Learning & Literacy',svc:'Learning Support',opts:[
     {l:'Yes, on track or doing really well',v:'ok',w:0},
     {l:'Slightly behind, needs a bit more help than other kids',v:'m1',w:1},
-    {l:'Noticeably behind, finds it quite hard',v:'m2',w:2},
-    {l:'Struggling a lot, school feels like a big challenge',v:'m3',w:3}
+    {l:'Noticeably behind, finds it quite hard',v:'m2',w:5},
+    {l:'Struggling a lot, school feels like a big challenge',v:'m3',w:10}
   ]},
   {id:'gut',type:'single',text:"How long have you been noticing these things?",area:null,svc:null,opts:[
     {l:'Only recently, just wanted to check',v:'none',w:0},
     {l:'A few weeks, something has been on my mind',v:'wk',w:1},
-    {l:'Several months, I keep coming back to it',v:'mo',w:2},
-    {l:'Over a year, I have been worried for a long time',v:'yr',w:3}
+    {l:'Several months, I keep coming back to it',v:'mo',w:5},
+    {l:'Over a year, I have been worried for a long time',v:'yr',w:10}
   ]}
 ];
 
@@ -350,29 +350,29 @@ function goBack(){if(curQ>0)renderQ(curQ-1);}
 
 function compute(){
   const ids=['speech','behaviour','social','motor','attention','learning'];
+  // Points per answer: 0 | 1 | 5 | 10
+  // Max per area = 10, 6 areas = 60 pts max
   let raw=0,areas=[],svcs=new Set();
-  let maxSingleScore=0; // track the worst individual answer
   ids.forEach(id=>{
     const a=ans[id];if(!a)return;
     raw+=a.w;
-    if(a.w>maxSingleScore)maxSingleScore=a.w;
     const q=Qs.find(q=>q.id===id);
     areas.push({name:q.area,w:a.w});
     if(a.w>=1&&q.svc)svcs.add(q.svc);
   });
+
+  // Gut (duration) adds up to 8 bonus points on top — scaled from its 0/1/5/10 range
   const gut=ans['gut']?.w||0;
-  const wt=raw+gut*1.5,mx=ids.length*3+3*1.5;
-  let pct=Math.round((wt/mx)*100);
+  const gutBonus=Math.round((gut/10)*8); // max +8
 
-  // ── Floor rules ──
-  // Any answer at w=1 (option 2): minimum 55%
-  // Any answer at w=2 (option 3): minimum 70%
-  // Any answer at w=3 (option 4): minimum 82%
-  if(maxSingleScore>=3)      pct=Math.max(pct,82);
-  else if(maxSingleScore>=2) pct=Math.max(pct,70);
-  else if(maxSingleScore>=1) pct=Math.max(pct,55);
+  const total=raw+gutBonus;
+  const max=60+8; // 68 pts possible
+  let pct=Math.min(Math.round((total/max)*100),96);
 
-  pct=Math.min(pct,96); // cap at 96 — never show 100%
+  // ── Guarantee: any answer 3 (w=5) → min 70% | any answer 4 (w=10) → min 82%
+  const maxW=Math.max(...ids.map(id=>ans[id]?.w||0));
+  if(maxW>=10)      pct=Math.max(pct,82);
+  else if(maxW>=5)  pct=Math.max(pct,70);
 
   let col=pct<40?'#059669':pct<65?'#D97706':pct<78?'#E67E22':'#DC2626';
   let msg=pct<40
@@ -392,12 +392,13 @@ function renderRes(){
   setTimeout(()=>{fl.style.strokeDashoffset=276.46-(276.46*pct/100);},80);
   document.getElementById('gNum').textContent=pct+'%';
   document.getElementById('bMsg').innerHTML=msg;
-  const sigs=['On track','Worth watching','Some concern','High concern'];
-  const wids=['22%','55%','78%','100%'];
+  const sigs={0:'On track',1:'Worth watching',5:'Some concern',10:'High concern'};
+  const cols={0:'b0',1:'b1',5:'b2',10:'b3'};
+  const wids={0:'8%',1:'30%',5:'65%',10:'100%'};
   const re=document.getElementById('aRows');re.innerHTML='';
   areas.forEach(({name,w})=>{
     const r=document.createElement('div');r.className='ar';
-    r.innerHTML=`<div class="an">${name}</div><div class="abt"><div class="ab b${w}" data-w="${wids[w]}"></div></div><div class="asi s${w}">${sigs[w]}</div>`;
+    r.innerHTML=`<div class="an">${name}</div><div class="abt"><div class="ab ${cols[w]}" data-w="${wids[w]}"></div></div><div class="asi s${w===10?3:w===5?2:w===1?1:0}">${sigs[w]}</div>`;
     re.appendChild(r);
   });
   setTimeout(()=>{document.querySelectorAll('.ab').forEach(b=>{b.style.width=b.dataset.w;});},140);
