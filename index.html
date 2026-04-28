@@ -225,7 +225,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,san
 </div>
 <script>
 // ► CONFIG
-const GHL  = 'YOUR_GHL_WEBHOOK_URL_HERE';
+const GHL  = 'https://services.leadconnectorhq.com/hooks/qBMR9QZ28L6xDEHgdrbM/webhook-trigger/3sFgR5Wy2ZSrKJUjsbLq';
 const WAN  = '6580152275'; // WhatsApp number, no + or spaces
 const WAM  = "Hi! I just completed the MindChamps Allied Care developmental screening and would like to discuss my child's results with a therapist.";
 const PID  = '2794864544185126';
@@ -431,41 +431,61 @@ function submit(){
     fbq('track','Lead',{content_name:'Developmental Quiz',content_category:'Quiz Lead'});
   }
 
-  // ── GHL payload: contact details + all quiz answers ──
-  const qLabels={
-    age:'Child Age',speech:'Speech & Language',behaviour:'Behaviour & Regulation',
-    social:'Social & Play Skills',motor:'Motor & Coordination',
-    attention:'Attention & Focus',learning:'Learning & Literacy',gut:'Duration of Concern'
+  // ── GHL payload ──
+  const scoreLabel={0:'On track',1:'Worth watching',5:'Some concern',10:'High concern'};
+
+  const areaScores={
+    'Speech & Language':    scoreLabel[ans['speech']?.w??0],
+    'Behaviour & Regulation':scoreLabel[ans['behaviour']?.w??0],
+    'Social & Play Skills': scoreLabel[ans['social']?.w??0],
+    'Motor & Coordination': scoreLabel[ans['motor']?.w??0],
+    'Attention & Focus':    scoreLabel[ans['attention']?.w??0],
+    'Learning & Literacy':  scoreLabel[ans['learning']?.w??0],
   };
-  const quizAnswers={};
-  Object.keys(qLabels).forEach(id=>{
-    quizAnswers[qLabels[id]]=ans[id]?.l||'Not answered';
-  });
 
   const payload={
+    // ── Contact fields (native GHL) ──
     firstName: n.split(' ')[0],
     lastName:  n.split(' ').slice(1).join(' ')||'',
     email:     e,
     phone:     '+65'+p,
     source:    'Quiz Funnel — Landing Page',
-    // Quiz answers sent as custom fields for GHL review
-    customField: {
-      'quiz_child_age':          ans['age']?.l||'',
-      'quiz_speech':             ans['speech']?.l||'',
-      'quiz_behaviour':          ans['behaviour']?.l||'',
-      'quiz_social':             ans['social']?.l||'',
-      'quiz_motor':              ans['motor']?.l||'',
-      'quiz_attention':          ans['attention']?.l||'',
-      'quiz_learning':           ans['learning']?.l||'',
-      'quiz_duration_of_concern':ans['gut']?.l||'',
-      'quiz_benefit_score':      res.pct+'%',
-      'quiz_completed_at':       new Date().toISOString()
+
+    // ── Custom fields (map these to your GHL custom fields) ──
+    customField:{
+      'quiz_benefit_score':       res.pct+'%',
+      'quiz_child_age':           ans['age']?.l||'',
+      'quiz_speech':              ans['speech']?.l||'',
+      'quiz_behaviour':           ans['behaviour']?.l||'',
+      'quiz_social':              ans['social']?.l||'',
+      'quiz_motor':               ans['motor']?.l||'',
+      'quiz_attention':           ans['attention']?.l||'',
+      'quiz_learning':            ans['learning']?.l||'',
+      'quiz_duration_of_concern': ans['gut']?.l||'',
+      'quiz_completed_at':        new Date().toISOString()
     },
-    // Also send as a flat note for easy reading in GHL contact timeline
-    notes: `Quiz Answers:\n`+Object.entries(quizAnswers).map(([k,v])=>`${k}: ${v}`).join('\n')+`\n\nBenefit Score: ${res.pct}%`
+
+    // ── Notes field: full readable summary on contact timeline ──
+    notes:[
+      `=== QUIZ RESULTS ===`,
+      `Benefit Score: ${res.pct}%`,
+      ``,
+      `=== AREA BREAKDOWN ===`,
+      ...Object.entries(areaScores).map(([area,score])=>`${area}: ${score}`),
+      ``,
+      `=== ANSWERS ===`,
+      `Child Age: ${ans['age']?.l||'Not answered'}`,
+      `Speech & Language: ${ans['speech']?.l||'Not answered'}`,
+      `Behaviour & Regulation: ${ans['behaviour']?.l||'Not answered'}`,
+      `Social & Play Skills: ${ans['social']?.l||'Not answered'}`,
+      `Motor & Coordination: ${ans['motor']?.l||'Not answered'}`,
+      `Attention & Focus: ${ans['attention']?.l||'Not answered'}`,
+      `Learning & Literacy: ${ans['learning']?.l||'Not answered'}`,
+      `Duration of Concern: ${ans['gut']?.l||'Not answered'}`,
+    ].join('\n')
   };
 
-  const send=GHL!=='YOUR_GHL_WEBHOOK_URL_HERE'
+  const send=GHL
     ?fetch(GHL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).catch(()=>{})
     :Promise.resolve();
 
