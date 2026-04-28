@@ -4,11 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Is Your Child Developing Well? | MindChamps Allied Care</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
 <style>
+/* Offline-safe font stack — no external requests */
+@font-face{font-family:'DM Serif Display';font-style:normal;font-weight:400;src:local('Georgia'),local('Times New Roman');}
+@font-face{font-family:'DM Serif Display';font-style:italic;font-weight:400;src:local('Georgia Italic'),local('Times New Roman Italic');}
 :root{--navy:#1B3653;--teal:#0E7C7B;--teal-dark:#177A75;--tl:#E4F6F8;--tm:#9DCECE;--warm:#F7F4EF;--w:#FFFFFF;--t:#1B3653;--mu:#637282;--bd:#DDE4EA;--sh:0 4px 24px rgba(27,54,83,.09);--shl:0 16px 48px rgba(27,54,83,.14);--gr:#059669;--am:#D97706;--or:#E67E22;--re:#DC2626;--purple:#8C3899;}
 *{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'DM Sans',sans-serif;background:var(--warm);color:var(--t);min-height:100vh;line-height:1.6;-webkit-font-smoothing:antialiased;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--warm);color:var(--t);min-height:100vh;line-height:1.6;-webkit-font-smoothing:antialiased;}
 .hdr{background:var(--w);border-bottom:1px solid var(--bd);padding:10px 24px;display:flex;align-items:center;justify-content:center;position:sticky;top:0;z-index:100;}
 .logo img{height:56px;width:auto;display:block;}
 .pb{background:var(--w);border-bottom:1px solid var(--bd);padding:12px 24px 15px;display:none;}
@@ -226,7 +228,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--warm);color:var(--t);min-
 const GHL  = 'YOUR_GHL_WEBHOOK_URL_HERE';
 const WAN  = '6580152275'; // WhatsApp number, no + or spaces
 const WAM  = "Hi! I just completed the MindChamps Allied Care developmental screening and would like to discuss my child's results with a therapist.";
-const PID  = ''; // Meta Pixel ID
+const PID  = '2794864544185126';
 
 // QUIZ DATA
 const Qs=[
@@ -487,7 +489,7 @@ function submit(){
   ══ SETUP CHECKLIST ══════════════════════════════════════════
   1. GHL webhook  → replace 'YOUR_GHL_WEBHOOK_URL_HERE' in GHL const above
   2. Meta Pixel   → paste your Pixel base code snippet below this comment,
-                    then set PID = 'YOUR_PIXEL_ID' in the config above
+                    then set PID = '2794864544185126' in the config above
   3. WhatsApp     → WAN is already set to 6580152275
 
   META PIXEL CONVERSION EVENTS (already wired — just paste Pixel base code):
@@ -509,6 +511,24 @@ function submit(){
   or read the 'notes' field directly on the contact record for a quick overview.
   ════════════════════════════════════════════════════════════
 -->
+
+<!-- Meta Pixel Base Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window,document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init','2794864544185126');
+fbq('track','PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=2794864544185126&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Meta Pixel Base Code -->
 
 </body>
 </html>
