@@ -175,11 +175,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,san
           <div class="pr"><div class="pp">+65</div><input class="fi" type="tel" id="fP" placeholder="9123 4567" autocomplete="tel" style="flex:1"></div>
           <div class="ferr" id="eP">Please enter a valid Singapore mobile number.</div>
         </div>
-        <div class="fg">
-          <label class="fl2" for="fE">Email address <span style="color:var(--re)">*</span></label>
-          <input class="fi" type="email" id="fE" placeholder="sarah@email.com" autocomplete="email">
-          <div class="ferr" id="eE">Please enter a valid email address.</div>
-        </div>
         <button class="bp" id="btnSub" onclick="submit()" style="width:100%;text-align:center;margin-top:10px;">Show My Results →</button>
         <div class="pv"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>We only use your details to personalise your results. No spam.</div>
         <button class="bb" onclick="show('s1');renderQ(curQ);" style="margin-top:16px;">← Back to quiz</button>
@@ -411,15 +406,13 @@ function renderRes(){
 function submit(){
   const n=document.getElementById('fN').value.trim();
   const p=document.getElementById('fP').value.trim().replace(/\s/g,'');
-  const e=document.getElementById('fE').value.trim();
-  [['fN','eN'],['fP','eP'],['fE','eE']].forEach(([f,er])=>{
+  [['fN','eN'],['fP','eP']].forEach(([f,er])=>{
     document.getElementById(f).classList.remove('err');
     document.getElementById(er).style.display='none';
   });
   let ok=true;
   if(!n){document.getElementById('fN').classList.add('err');document.getElementById('eN').style.display='block';ok=false;}
   if(!p||!/^[689]\d{7}$/.test(p)){document.getElementById('fP').classList.add('err');document.getElementById('eP').style.display='block';ok=false;}
-  if(!e||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)){document.getElementById('fE').classList.add('err');document.getElementById('eE').style.display='block';ok=false;}
   if(!ok)return;
   uName=n;
   const btn=document.getElementById('btnSub');
@@ -447,7 +440,6 @@ function submit(){
     // ── Contact fields (native GHL) ──
     firstName: n.split(' ')[0],
     lastName:  n.split(' ').slice(1).join(' ')||'',
-    email:     e,
     phone:     '+65'+p,
     source:    'Quiz Funnel — Landing Page',
 
@@ -520,7 +512,7 @@ function submit(){
                                           event to optimise toward quality leads
 
   GHL PAYLOAD INCLUDES:
-    - firstName, lastName, email, phone (+65 prefixed)
+    - firstName, lastName, phone (+65 prefixed)
     - customField: quiz_child_age, quiz_speech, quiz_behaviour,
                    quiz_social, quiz_motor, quiz_attention,
                    quiz_learning, quiz_duration_of_concern,
